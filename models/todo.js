@@ -1,25 +1,92 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, where } = require("sequelize");
+const { Op } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
     }
+
+    // to add todo items
 
     static addTodo({ title, dueDate }) {
       return this.create({ title: title, dueDate: dueDate, completed: false });
     }
 
-    markAsCompleted() {
-      return this.update({ completed: true });
+    // for completion status
+
+    setCompletionStatus() {
+      return this.update({
+        completed: !this.completed,
+      });
     }
+    
+    // to get todo list
+
     static getTodos() {
-      return this.findAll({ order: [["id", "ASC"]] });
+      const todos = Todo.findAll({
+        order: [["id", "ASC"]],
+      });
+      return todos;
+    }
+    
+    //to get over due items
+
+    static getOverdueItems() {
+      const overdueItems = Todo.findAll({
+        where: {
+          dueDate: { [Op.lt]: new Date() },
+          completed: { [Op.eq]: false },
+        },
+        order: [["id", "ASC"]],
+      });
+
+      return overdueItems;
+    }
+
+    // to get items that are due today
+
+    static getDueTodayItems() {
+      const dueTodayItems = Todo.findAll({
+        where: {
+          dueDate: new Date(),
+          completed: { [Op.eq]: false },
+        },
+        order: [["id", "ASC"]],
+      });
+
+      return dueTodayItems;
+    }
+    
+    // to get items that are due later
+    static getDueLaterItems() {
+      const dueLaterItems = Todo.findAll({
+        where: {
+          dueDate: { [Op.gt]: new Date() },
+          completed: { [Op.eq]: false },
+        },
+        order: [["id", "ASC"]],
+      });
+
+      return dueLaterItems;
+    }
+    
+    // to delete a todo list
+
+    deleteTodo() {
+      return this.destroy({
+        where: {
+          id: this.id,
+        },
+      });
+    }
+    
+    // to get list of completed todo items
+
+    static getCompletedTodos() {
+      return this.findAll({
+        where: { completed: { [Op.eq]: true } },
+        order: [["id", "DESC"]],
+      });
     }
   }
   Todo.init(
