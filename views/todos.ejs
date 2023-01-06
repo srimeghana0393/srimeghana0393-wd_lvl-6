@@ -10,6 +10,8 @@
     <title><%= title %></title>
     <script>
         var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+        //function to update a todo
         function updateTodo(id, state) {
             fetch(`/todos/${id}`, {
                 method: "put",
@@ -24,6 +26,8 @@
                 }
             }).catch((err)=> console.error(err))
         }
+
+        //function to delete a todo
         function deleteTodo(id) {
             fetch(`/todos/${id}`, {
                 method: "delete",

@@ -2,11 +2,12 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("Todos", "userID", {
+    await queryInterface.addColumn("Todos", "userID", { 
+      //adds a todo item in the table for specific user
       type: Sequelize.DataTypes.INTEGER,
     });
 
-    await queryInterface.addConstraint("Todos", {
+    await queryInterface.addConstraint("Todos", { 
       fields: ["userID"],
       type: "foreign key",
       references: {
@@ -14,21 +15,11 @@ module.exports = {
         field: "id",
       },
     });
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
+
   },
 
   async down(queryInterface, Sequelize) {
     await queryInterface.removeColumn("Todos", "userID");
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    //removes a todo item for a specific user
   },
 };

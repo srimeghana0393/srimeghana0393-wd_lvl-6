@@ -14,7 +14,6 @@ const LocalStratergy = require("passport-local");
 
 const saltRounds = 10;
 
-// eslint-disable-next-line no-undef
 app.set("views", path.join(__dirname, "views"));
 app.use(flash());
 app.use(bodyParser.json());
@@ -45,6 +44,7 @@ passport.use(
       usernameField: "email",
       passwordField: "password",
     },
+    //validate email and password
     (username, password, done) => {
       User.findOne({ where: { email: username } })
         .then(async (user) => {
@@ -78,7 +78,6 @@ passport.deserializeUser((id, done) => {
 });
 
 app.set("view engine", "ejs");
-// eslint-disable-next-line no-undef
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", async function (request, response) {
@@ -129,6 +128,7 @@ app.get("/signup", (request, response) => {
   });
 });
 
+//all the fields are to be filled
 app.post("/users", async (request, response) => {
   if (!request.body.firstName) {
     request.flash("error", "Please enter your first name");
@@ -148,18 +148,20 @@ app.post("/users", async (request, response) => {
   }
   const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
   try {
+    //create a user
     const user = await User.create({
       firstName: request.body.firstName,
       lastName: request.body.lastName,
       email: request.body.email,
       password: hashedPwd,
     });
+    // login a user
     request.login(user, (err) => {
       if (err) {
         console.log(err);
         response.redirect("/");
       } else {
-        response.redirect("/todos");
+        response.redirect("/todos"); //redirecting to their todo list
       }
     });
   } catch (error) {
@@ -194,18 +196,6 @@ app.get("/signout", (request, response, next) => {
     response.redirect("/");
   });
 });
-
-// app.get("/todos", async function (_request, response) {
-//   console.log("Processing list of all Todos ...");
-//   // FILL IN YOUR CODE HERE
-//   try {
-//     const todos = await Todo.findAll();
-//     return response.json(todos);
-//   } catch (error) {
-//     console.log(error);
-//     return response.status(422).json(error);
-//   }
-// });
 
 app.get(
   "/todos/:id",
@@ -269,7 +259,6 @@ app.delete(
   connectEnsureLogin.ensureLoggedIn(),
   async function (request, response) {
     console.log("We have to delete a Todo with ID: ", request.params.id);
-    // FILL IN YOUR CODE HERE
     try {
       const res = await Todo.remove(request.params.id, request.user.id);
       return response.json({ success: res === 1 });
@@ -277,9 +266,6 @@ app.delete(
       console.log(error);
       return response.status(422).json(error);
     }
-    // First, we have to query our database to delete a Todo by ID.
-    // Then, we have to respond back with true/false based on whether the Todo was deleted or not.
-    // response.send(true)
   }
 );
 

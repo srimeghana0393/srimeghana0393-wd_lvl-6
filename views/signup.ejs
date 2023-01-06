@@ -13,7 +13,7 @@
     <div class="grid grid-cols-6">
         <div class="col-start-3 col-span-2">
             <%- include('header.ejs') %>
-            <h6 class="py-4">Sign Up as a new user</h6>
+            <h6 class="py-4">Register as a new user</h6>
             <div>
                 <% if (messages && messages.error && messages.error.length > 0) { %>
                     <% for(var i=0; i<messages.error.length; i++) { %>
@@ -39,7 +39,7 @@
                     <label for="password">Password: </label>
                     <input id="password" type="password" name="password" class="border border-color-300 text-gray-900 rounded p-2 w-full">
                 </div>
-                <button type="submit" class="bg-green-600 text-white hover:bg-green-900 font-medium rounded px-5 py-2">Sign up</button>
+                <button type="submit" class="bg-green-600 text-white hover:bg-green-900 font-medium rounded px-5 py-2">Register</button>
             </form>
             
         </div>
