@@ -1,0 +1,8 @@
+body {
+font-family: Verdana, Geneva, Tahoma, sans-serif;
+background: burlywood;
+}
+
+.Todo-Item:hover .trash-icon{
+  display:block;
+}

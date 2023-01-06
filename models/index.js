@@ -1,7 +1,5 @@
 "use strict";
 
-// index.js file for todo
-
 const fs = require("fs");
 const path = require("path");
 const Sequelize = require("sequelize");
@@ -17,8 +15,8 @@ if (config.use_env_variable) {
 } else {
   sequelize = new Sequelize(
     config.database,
-    config.username, // database username
-    config.password, // database password
+    config.username,
+    config.password,
     config
   );
 }

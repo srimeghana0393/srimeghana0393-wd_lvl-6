@@ -1,97 +1,86 @@
 "use strict";
-const { Model, where } = require("sequelize");
-const { Op } = require("sequelize");
+const { Model, Op } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
+
     static associate(models) {
     }
-
-    // to add todo items
-
-    static addTodo({ title, dueDate }) {
-      return this.create({ title: title, dueDate: dueDate, completed: false });
-    }
-
-    // for completion status
-
-    setCompletionStatus() {
-      return this.update({
-        completed: !this.completed,
-      });
+    //add a todo
+    static addaTodo({ title, dueDate }) {
+      return this.create({ title: title, dueDate: dueDate, completed: false }); //creates a todo with title, duedate, and completed status
     }
     
-    // to get todo list
-
-    static getTodos() {
-      const todos = Todo.findAll({
-        order: [["id", "ASC"]],
-      });
-      return todos;
-    }
-    
-    //to get over due items
-
-    static getOverdueItems() {
-      const overdueItems = Todo.findAll({
-        where: {
-          dueDate: { [Op.lt]: new Date() },
-          completed: { [Op.eq]: false },
-        },
-        order: [["id", "ASC"]],
-      });
-
-      return overdueItems;
+    //gets list of all todos
+    static getAllTodos() {
+      return this.findAll({ order: [["id", "ASC"]] }); //gets list of all todos in ascending order
     }
 
-    // to get items that are due today
-
-    static getDueTodayItems() {
-      const dueTodayItems = Todo.findAll({
-        where: {
-          dueDate: new Date(),
-          completed: { [Op.eq]: false },
-        },
-        order: [["id", "ASC"]],
-      });
-
-      return dueTodayItems;
-    }
-    
-    // to get items that are due later
-    static getDueLaterItems() {
-      const dueLaterItems = Todo.findAll({
-        where: {
-          dueDate: { [Op.gt]: new Date() },
-          completed: { [Op.eq]: false },
-        },
-        order: [["id", "ASC"]],
-      });
-
-      return dueLaterItems;
-    }
-    
-    // to delete a todo list
-
-    deleteTodo() {
-      return this.destroy({
-        where: {
-          id: this.id,
-        },
-      });
-    }
-    
-    // to get list of completed todo items
-
-    static getCompletedTodos() {
+    //list of completed items
+    static async completedItemsAre() {
       return this.findAll({
-        where: { completed: { [Op.eq]: true } },
-        order: [["id", "DESC"]],
+        where: { completed: { [Op.eq]: true } }, //when completed status is true
+        order: [["id", "DESC"]], //display in descending order
+      });
+    }
+
+    //to remove an item in todo 
+    static async remove(id) {
+      return this.destroy({ 
+        where: {
+          id, //using an id
+        },
+      });
+    }
+    
+    //modify completed status 
+    setCompletionStatusAs(bool) {
+      return this.update({ completed: bool }); //update completed status
+    }
+
+    //list of overdues
+    static async overdue() {
+      return this.findAll({
+        where: {
+          dueDate: {
+            [Op.lt]: new Date().toLocaleDateString("en-CA"), //when duedate is less than today's date
+          },
+          completed: false, //and status is false
+        },
+        order: [["id", "ASC"]], // display in ascending order
+      });
+    }
+
+    //list of items that are due today
+    static async dueToday() {
+      return this.findAll({
+        where: {
+          dueDate: {
+            [Op.eq]: new Date().toLocaleDateString("en-CA"), //when due date is equal to todays date
+          },
+          completed: false, //and status is false
+        },
+        order: [["id", "ASC"]], //display in ascending order
+      });
+    }
+
+    //items that are due later
+    static async dueLater() {
+      return this.findAll({
+        where: {
+          dueDate: {
+            [Op.gt]: new Date().toLocaleDateString("en-CA"), //when due date is equal to todays date
+          },
+          completed: false, //and status is false
+        },
+        order: [["id", "ASC"]], //display in ascending order
       });
     }
   }
+
   Todo.init(
     {
-      title: DataTypes.STRING,
+      title: DataTypes.STRING, 
       dueDate: DataTypes.DATEONLY,
       completed: DataTypes.BOOLEAN,
     },
