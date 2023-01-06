@@ -1,8 +1,8 @@
 body {
-font-family: Verdana, Geneva, Tahoma, sans-serif;
-background: burlywood;
+  background-color: white;
+  font-family: sans-serif;
 }
 
-.Todo-Item:hover .trash-icon{
-  display:block;
+.Todo-Item:hover .trash-icon {
+  display: block;
 }

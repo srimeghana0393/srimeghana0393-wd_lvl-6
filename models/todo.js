@@ -1,88 +1,119 @@
 "use strict";
-const { Model, Op } = require("sequelize");
-
+const { Op, where } = require("sequelize");
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
-
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
     static associate(models) {
-    }
-    //add a todo
-    static addaTodo({ title, dueDate }) {
-      return this.create({ title: title, dueDate: dueDate, completed: false }); //creates a todo with title, duedate, and completed status
-    }
-    
-    //gets list of all todos
-    static getAllTodos() {
-      return this.findAll({ order: [["id", "ASC"]] }); //gets list of all todos in ascending order
+      Todo.belongsTo(models.User, {
+        foreignKey: "userID",
+      });
+      // define association here
     }
 
-    //list of completed items
-    static async completedItemsAre() {
-      return this.findAll({
-        where: { completed: { [Op.eq]: true } }, //when completed status is true
-        order: [["id", "DESC"]], //display in descending order
+    static addTodo({ title, dueDate, userID }) {
+      return this.create({
+        title: title,
+        dueDate: dueDate,
+        completed: false,
+        userID,
       });
     }
 
-    //to remove an item in todo 
-    static async remove(id) {
-      return this.destroy({ 
+    static getTodos(userID) {
+      return this.findAll({
         where: {
-          id, //using an id
+          userID,
         },
       });
     }
-    
-    //modify completed status 
-    setCompletionStatusAs(bool) {
-      return this.update({ completed: bool }); //update completed status
-    }
 
-    //list of overdues
-    static async overdue() {
-      return this.findAll({
+    static async overDue(userID) {
+      return await Todo.findAll({
         where: {
           dueDate: {
-            [Op.lt]: new Date().toLocaleDateString("en-CA"), //when duedate is less than today's date
+            [Op.lt]: new Date(),
           },
-          completed: false, //and status is false
+          userID,
+          completed: false,
         },
-        order: [["id", "ASC"]], // display in ascending order
+        order: [["id", "ASC"]],
       });
     }
 
-    //list of items that are due today
-    static async dueToday() {
-      return this.findAll({
+    static async dueToday(userID) {
+      return await Todo.findAll({
         where: {
           dueDate: {
-            [Op.eq]: new Date().toLocaleDateString("en-CA"), //when due date is equal to todays date
+            [Op.eq]: new Date(),
           },
-          completed: false, //and status is false
+          userID,
+          completed: false,
         },
-        order: [["id", "ASC"]], //display in ascending order
+        order: [["id", "ASC"]],
       });
     }
 
-    //items that are due later
-    static async dueLater() {
-      return this.findAll({
+    static async dueLater(userID) {
+      return await Todo.findAll({
         where: {
           dueDate: {
-            [Op.gt]: new Date().toLocaleDateString("en-CA"), //when due date is equal to todays date
+            [Op.gt]: new Date(),
           },
-          completed: false, //and status is false
+          userID,
+          completed: false,
         },
-        order: [["id", "ASC"]], //display in ascending order
+        order: [["id", "ASC"]],
       });
+    }
+
+    static async completedItems(userID) {
+      return await Todo.findAll({
+        where: {
+          completed: true,
+          userID,
+        },
+      });
+    }
+
+    static async remove(id, userID) {
+      return this.destroy({
+        where: {
+          id,
+          userID,
+        },
+      });
+    }
+
+    setCompletionStatus(state) {
+      return this.update({ completed: state });
     }
   }
-
   Todo.init(
     {
-      title: DataTypes.STRING, 
-      dueDate: DataTypes.DATEONLY,
-      completed: DataTypes.BOOLEAN,
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          len: 5,
+        },
+      },
+      dueDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+        validate: {
+          notNull: true,
+        },
+      },
+      completed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       sequelize,
