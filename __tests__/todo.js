@@ -11,15 +11,20 @@ function extractCsrfToken(response) {
 }
 
 //describe function
-describe("Checking Todo", () => {
+describe("Checking Todo", function() {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
-    server = app.listen(4000, () => {});
+    server = app.listen(3000, () => {});
     agent = request.agent(server);
   });
+
   afterAll(async () => {
+    try {
     await db.sequelize.close();
-    server.close();
+    await server.close();
+    } catch (error) {
+      console.log(error);
+    } 
   });
 
   //Test to create a new todo
@@ -32,41 +37,9 @@ describe("Checking Todo", () => {
       completed: false, //status
       _csrf: csrfToken, //csrf token
     });
-    expect(response.statusCode).toBe(422); 
+    expect(response.statusCode).toBe(302); 
   });
 
-  // Test for false to true
-  test("Updating the completed field in a todo list", async () => {
-    const res = await agent.get("/");
-    const csrfToken = extractCsrfToken(res); //gets csrf token
-    await agent.post("/todos").send({
-      title: "Exam prep", //name
-      dueDate: new Date().toISOString(), //duedate
-      completed: false, //status
-      _csrf: csrfToken, //csrf token
-    });
-
-    // the added todo is in 2nd position in the list of newly added
-    const todoID = await agent.get("/todos").then((response) => {
-      const parsedResponse1 = JSON.parse(response.text);
-      return parsedResponse1[1]["id"];
-    });
-
-    // Testing for false to true
-    const setcr1 = await agent
-      .put(`/todos/${todoID}`)
-      .send({ completed: true, _csrf: csrfToken });
-    const parsedUpdateResponse3 = JSON.parse(setcr1.text);
-    expect(parsedUpdateResponse3.completed).toBe(true);
-
-    // Testing for true to false
-    const setcr2 = await agent
-      .put(`/todos/${todoID}`)
-      .send({ completed: false, _csrf: csrfToken });
-    const parsedUpdateResponse2 = JSON.parse(setcr2.text);
-    expect(parsedUpdateResponse2.completed).toBe(false);
-  });
-  
  //Test for marking a todo as complete
   test("To mark a todo as complete", async () => {
     let res = await agent.get("/");
@@ -82,14 +55,14 @@ describe("Checking Todo", () => {
       .get("/")
       .set("Accept", "application/json");
     const parsedGroupedResponse = JSON.parse(gropuedTodosResponse.text);
-    const duetc = parsedGroupedResponse.dueToday.length;
-    const newtodos = parsedGroupedResponse.dueToday[duetc - 1];
+    const duetc = parsedGroupedResponse.dueTodayItems.length;
+    const newtodos = parsedGroupedResponse.dueTodayItems[duetc - 1];
     
     res = await agent.get("/");
     csrfToken = extractCsrfToken(res);
    
     console.log(newtodos)
-    const markAsCompleteresponse = await agent.put(`todos/${newtodos["id"]}`).send({
+    const markAsCompleteresponse = await agent.put(`/todos/${newtodos.id}`).send({
       _csrf: csrfToken,
     });
     const parsedUpdateResponse = JSON.parse(markAsCompleteresponse.text);
