@@ -2,33 +2,38 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    //create a table for todos in database
+    //table for todo items
     await queryInterface.createTable("Todos", {
-      //id
+      //id of todo
       id: {
-        allowNull: false, //do not allow empty
-        autoIncrement: true, 
-        primaryKey: true, //id acts as primary key
+        allowNull: false, // do not allow empty
+        autoIncrement: true,
+        primaryKey: true, //acts as a primary key
         type: Sequelize.INTEGER, //type - number
       },
-      //title
+
+      //title of the todo item
       title: {
         type: Sequelize.STRING, //type - string
       },
-      // duedate for an item 
+
+      //due date for the todo item
       dueDate: {
         type: Sequelize.DATEONLY, //type - only date
       },
-      //completed status of an item
+
+      //status of the todo item
       completed: {
         type: Sequelize.BOOLEAN, //type - true or false
       },
-      //when the item is created
+
+      //todo item created on
       createdAt: {
         allowNull: false, //do not allow empty
         type: Sequelize.DATE, //type - date
       },
-      //when the item is updated
+
+      //todo item update on 
       updatedAt: {
         allowNull: false, //do not allow empty
         type: Sequelize.DATE, //type - date
