@@ -14,7 +14,7 @@ function extractCsrfToken(response) {
 describe("Checking Todo", function() {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
-    server = app.listen(3000, () => {});
+    server = app.listen(4000, () => {});
     agent = request.agent(server);
   });
 
@@ -39,6 +39,41 @@ describe("Checking Todo", function() {
     });
     expect(response.statusCode).toBe(302); 
   });
+
+  // Test for false to true
+
+  test("To update the completed field of a given todo list : ", async () => {
+    const res = await agent.get("/");
+    const csrfToken = extractCsrfToken(res);
+    await agent.post("/todos").send({
+      title: "Study for exams",
+      dueDate: new Date().toISOString(),
+      completed: false,
+      _csrf: csrfToken,
+    });
+
+    
+    const todoID = await agent.get("/todos").then((response) => {
+      const parsedResponse1 = JSON.parse(response.text);
+      return parsedResponse1[1]["id"];
+    });
+
+    // Testing for false to true
+    const setCompletionResponse1 = await agent
+      .put(`/todos/${todoID}`)
+      .send({ completed: true, _csrf: csrfToken });
+    const parsedUpdateResponse3 = JSON.parse(setCompletionResponse1.text);
+    expect(parsedUpdateResponse3.completed).toBe(true);
+
+    // Testing for true to false
+    const setCompletionResponse2 = await agent
+      .put(`/todos/${todoID}`)
+      .send({ completed: false, _csrf: csrfToken });
+    const parsedUpdateResponse2 = JSON.parse(setCompletionResponse2.text);
+    expect(parsedUpdateResponse2.completed).toBe(false);
+  });
+  
+
 
  //Test for marking a todo as complete
   test("To mark a todo as complete", async () => {
